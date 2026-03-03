@@ -71,6 +71,8 @@ cp .env.example .env.local
   - `HUNAU_REVIEW_PROMPT`
   - `HUNAU_SUBJECTIVE_MAX_CHARS`（默认 `25`）
 
+如果需要使用 `apikey` 来调用大模型，可以使用 `https://linxi.chat`，并参考 `https://linxi.apifox.cn/` 文档进行配置。
+
 ## 运行
 
 ```bash
