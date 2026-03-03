@@ -19,7 +19,7 @@
 │  ├─ config.py          # 环境变量读取与设置
 │  ├─ constants.py       # URL / XPath / 固定常量
 │  └─ setup_env.py       # 交互式环境变量配置
-├─ main.py               # 根入口包装（调用 src.main）
+├─ app.py                # 根入口包装（调用 src.main）
 ├─ setup_env.py          # 根CLI包装（调用 src.setup_env）
 ├─ .env.local            # 本地配置（已被 .gitignore 忽略）
 └─ pyproject.toml
@@ -45,6 +45,12 @@ python3 -m venv .venv
 
 ### 方式2：手动编辑 `.env.local`
 
+先复制示例文件：
+
+```bash
+cp .env.example .env.local
+```
+
 关键字段：
 
 - 登录
@@ -68,7 +74,7 @@ python3 -m venv .venv
 ## 运行
 
 ```bash
-.venv/bin/python main.py
+.venv/bin/python app.py
 ```
 
 或：
