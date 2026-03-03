@@ -353,9 +353,70 @@ class TeachingEvalSpider(feapder.AirSpider):
             }:
                 continue
 
-            links = row.find_elements("xpath", COURSE_ACTION_IN_ROW_XPATH)
-            best_link, href, _ = cls.pick_best_action_element(links)
-            can_evaluate = best_link is not None
+            # 更新判断逻辑：检查操作列中的内容来确定是否可以评价
+            try:
+                # 获取操作列元素
+                action_td = row.find_element("xpath", "./td[10]")
+                
+                # 检查是否有链接或按钮
+                links = action_td.find_elements("xpath", ".//a | .//button | .//*[@role='button' or @role='link']")
+                
+                # 检查文本内容以判断状态
+                action_text = action_td.text.lower() if action_td.text else ""
+                
+                # 判断是否可以评价的逻辑
+                can_evaluate = False
+                
+                if links:
+                    # 如果有链接，检查每个链接的文字内容和类名
+                    for link in links:
+                        link_text = link.text.lower() if link.text else ""
+                        link_classes = (link.get_attribute("class") or "").lower()
+                        
+                        # 检查链接内的子元素的类名（如图标）
+                        child_spans = link.find_elements("tag name", "span")
+                        child_icons = []
+                        for span in child_spans:
+                            span_class = span.get_attribute("class")
+                            if span_class:
+                                child_icons.append(span_class.lower())
+                        
+                        # 检查链接文本、类名和子元素类名是否包含负面关键词
+                        is_negative_text = any(marker in link_text for marker in ACTION_NEGATIVE_TEXT_MARKERS)
+                        is_negative_class = any(marker in link_classes for marker in ACTION_NEGATIVE_CLASS_MARKERS)
+                        is_negative_icon = any("icon-finish" in icon_class for icon_class in child_icons)
+                        
+                        if is_negative_text or is_negative_class or is_negative_icon:
+                            # 如果是负面状态（已评价、已完成等），不能评价
+                            can_evaluate = False
+                            break
+                        else:
+                            # 检查是否包含正面关键词（如"评价"、"评教"等）或正面图标
+                            is_positive_text = any(marker in link_text for marker in ACTION_POSITIVE_TEXT_MARKERS)
+                            is_positive_class = any(marker in link_classes for marker in ACTION_POSITIVE_CLASS_MARKERS)
+                            is_positive_icon = any("icon-edit" in icon_class for icon_class in child_icons)
+                            
+                            if is_positive_text or is_positive_class or is_positive_icon:
+                                # 如果是正面状态（评价、评教等），可以评价
+                                can_evaluate = True
+                                break
+                else:
+                    # 如果没有链接，检查单元格本身的内容
+                    # 如果单元格内没有任何链接，检查是否包含负面关键词
+                    is_negative_td = any(marker in action_text for marker in ACTION_NEGATIVE_TEXT_MARKERS)
+                    
+                    if is_negative_td or not action_text.strip():
+                        # 单元格为空或包含负面关键词（如"未开放"），不能评价
+                        can_evaluate = False
+                    else:
+                        # 单元格有内容但不包含负面关键词，暂时认为不能评价（因为没有可点击元素）
+                        can_evaluate = False
+                        
+            except Exception:
+                # 如果无法获取操作列，尝试使用旧逻辑
+                links = row.find_elements("xpath", COURSE_ACTION_IN_ROW_XPATH)
+                best_link, href, _ = cls.pick_best_action_element(links)
+                can_evaluate = best_link is not None
 
             course = {
                 "position": position,
@@ -363,7 +424,7 @@ class TeachingEvalSpider(feapder.AirSpider):
                 "title": title,
                 "teacher_name": teacher_name,
                 "can_evaluate": can_evaluate,
-                "href": href,
+                "href": "" if "href" not in locals() else href,
             }
             all_courses.append(course)
             if can_evaluate:

@@ -85,7 +85,7 @@ ACTION_POSITIVE_TEXT_MARKERS = [
     "evaluate",
     "evaluation",
 ]
-ACTION_NEGATIVE_TEXT_MARKERS = ["已评", "已完成", "已提交", "查看", "详情"]
+ACTION_NEGATIVE_TEXT_MARKERS = ["已评", "已完成", "已提交", "查看", "详情", "未开放", "暂未开放", "暂未开始", "暂未开通"]
 ACTION_POSITIVE_CLASS_MARKERS = ["icon-edit", "icon-pencil", "edit", "evaluate"]
 ACTION_NEGATIVE_CLASS_MARKERS = [
     "disabled",
@@ -94,6 +94,7 @@ ACTION_NEGATIVE_CLASS_MARKERS = [
     "icon-eye",
     "icon-check",
     "icon-ok",
+    "icon-finish",
 ]
 ACTION_POSITIVE_ATTR_MARKERS = ["evaluate", "evaluation", "pingjia", "pj", "toeval"]
 
